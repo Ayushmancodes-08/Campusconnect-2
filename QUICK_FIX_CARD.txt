@@ -1,0 +1,90 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    AYUSHMAN PROFILE FIX - QUICK CARD                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+PROBLEM:
+  Logged in as Ayushman but seeing Om Sahoo's hardcoded data
+
+ROOT CAUSE:
+  Ayushman's student record doesn't exist in Supabase
+
+SOLUTION (3 STEPS):
+
+┌─ STEP 1: CREATE AYUSHMAN'S RECORD ─────────────────────────────────────┐
+│                                                                          │
+│ 1. Go to Supabase Dashboard                                             │
+│ 2. Click "SQL Editor" → "New Query"                                     │
+│ 3. Paste this:                                                          │
+│                                                                          │
+│    INSERT INTO students (name, email, phone, gender, address,           │
+│                         join_date, status)                              │
+│    VALUES (                                                              │
+│      'Ayushman Patra',                                                   │
+│      'ayushman@example.com',                                             │
+│      '9876543210',                                                       │
+│      'male',                                                             │
+│      '123 Main Street, City, Country',                                   │
+│      '2024-01-15',                                                       │
+│      'Active'                                                            │
+│    );                                                                    │
+│                                                                          │
+│ 4. Click "Run"                                                           │
+│ 5. Verify with: SELECT * FROM students WHERE email =                    │
+│    'ayushman@example.com';                                              │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 2: CLEAR BROWSER CACHE ──────────────────────────────────────────┐
+│                                                                          │
+│ 1. Press F12 (open DevTools)                                            │
+│ 2. Go to "Application" tab                                              │
+│ 3. Click "localStorage"                                                 │
+│ 4. Right-click → "Clear All"                                            │
+│    OR run in Console: localStorage.clear()                              │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+┌─ STEP 3: LOGIN AGAIN ──────────────────────────────────────────────────┐
+│                                                                          │
+│ 1. Logout from app                                                      │
+│ 2. Refresh page (F5)                                                    │
+│ 3. Login as Ayushman:                                                   │
+│    - Email: ayushman@example.com                                        │
+│    - Password: (your password)                                          │
+│ 4. Go to /dashboard/settings                                            │
+│ 5. Check Profile tab                                                    │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+
+EXPECTED RESULT:
+  ✓ Name: Ayushman Patra (NOT Om Sahoo)
+  ✓ Email: ayushman@example.com (NOT osahoo9178@gmail.com)
+  ✓ Phone: 9876543210 (NOT (123) 456-7890)
+  ✓ Address: 123 Main Street, City, Country (NOT 123 University Ave)
+  ✓ Gender: male
+
+VERIFICATION:
+  1. Open DevTools Console (F12)
+  2. Look for: "Settings - Using Supabase student data:"
+  3. Should show Ayushman's data, not Om Sahoo's
+
+TROUBLESHOOTING:
+  Still seeing Om Sahoo?
+  → Clear cache completely and close all browser tabs
+  → Open new browser window
+  → Login again
+
+  Getting error creating record?
+  → Check if email already exists
+  → Delete old record first
+  → Then create new one
+
+═══════════════════════════════════════════════════════════════════════════════
+
+CODE CHANGES:
+  ✓ Settings page now uses real student data from Supabase
+  ✓ useCurrentUser hook fetches data by email
+  ✓ StudentService retrieves from database
+  ✓ No more hardcoded Om Sahoo data for students
+
+═══════════════════════════════════════════════════════════════════════════════
