@@ -24,40 +24,54 @@ export function useCurrentUser(): CurrentUser {
   
   useEffect(() => {
     const loadCurrentUser = async () => {
+      // Optimistic load from localStorage
       if (isBrowser) {
         const storedRole = localStorage.getItem("userRole") as UserRole;
         const storedEmail = localStorage.getItem("userEmail");
         const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
 
-        console.log('useCurrentUser - Loading:', { storedRole, storedEmail, isLoggedIn });
-
         if (isLoggedIn && storedRole) {
           setRole(storedRole);
           setEmail(storedEmail);
+        }
+      }
 
-          // If student role, fetch student data from Supabase
-          if (storedRole === 'student' && storedEmail) {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+
+        if (data.authenticated && data.role) {
+          setRole(data.role);
+          setEmail(data.email);
+
+          if (data.role === 'student' && data.email) {
             try {
-              console.log('useCurrentUser - Fetching student data for email:', storedEmail);
-              const student = await StudentService.getByEmail(storedEmail);
-              console.log('useCurrentUser - Fetched student:', student);
+              const student = await StudentService.getByEmail(data.email);
               if (student) {
                 setStudentData(student);
-              } else {
-                console.warn('useCurrentUser - Student not found in Supabase for email:', storedEmail);
               }
             } catch (error) {
               console.error('useCurrentUser - Error fetching student data:', error);
             }
           }
         } else {
+          // If server says not authenticated, clear optimistic state
           setRole(null);
           setEmail(null);
           setStudentData(null);
+          if (isBrowser) {
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("userEmail");
+            localStorage.removeItem("isLoggedIn");
+          }
         }
+      } catch (error) {
+        console.error('useCurrentUser - Error verifying session:', error);
+      } finally {
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     };
+
 
     loadCurrentUser();
   }, []);

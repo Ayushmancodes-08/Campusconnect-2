@@ -55,10 +55,17 @@ export function UserNav() {
 
 
   const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout');
+    } catch (e) {
+      console.error('Failed to log out on server:', e);
+    }
     localStorage.removeItem("userRole");
+    localStorage.removeItem("userEmail");
     localStorage.removeItem("isLoggedIn");
     router.push("/login");
   };
+
 
   const profile = role ? (
     role === 'student' && studentData ? {

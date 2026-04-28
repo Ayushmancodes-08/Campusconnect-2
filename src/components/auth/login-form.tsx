@@ -48,83 +48,45 @@ export function LoginForm() {
     setIsLoading(true);
 
     try {
-      let isAuthenticated = false;
-      let loggedInRole: UserRole | null = null;
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role: selectedRole }),
+      });
 
-      // Hardcoded roles: admin, finance, hostel - must match selected role
-      const hardcodedRoles: UserRole[] = ["admin", "finance", "hostel"];
-      
-      if (hardcodedRoles.includes(selectedRole)) {
-        // For hardcoded roles, must match both email and selected role
-        const user = userProfiles[selectedRole];
-        if (user.email === email && password === "password") {
-          isAuthenticated = true;
-          loggedInRole = selectedRole;
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Invalid Role",
-            description: "Invalid email or password for this role.",
-          });
-        }
-      } else if (selectedRole === "student" || selectedRole === "teacher") {
-        // For student and teacher roles, check generated credentials
-        const storedCredentialsString = localStorage.getItem('userCredentials');
-        const storedCredentials = storedCredentialsString ? JSON.parse(storedCredentialsString) : [];
-        const foundUser = storedCredentials.find((cred: any) => cred.email === email && cred.password === password);
-        
-        if (foundUser) {
-          // Enforce role restriction: students can only login as student, teachers as teacher
-          if (foundUser.role === selectedRole) {
-            isAuthenticated = true;
-            loggedInRole = foundUser.role;
-          } else {
-            // Role violation: account exists but role doesn't match
-            toast({
-              variant: "destructive",
-              title: "Invalid Role",
-              description: `This account is registered as ${foundUser.role}. Students can only login as "Student" and Teachers can only login as "Teacher".`,
-            });
-          }
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Invalid Role",
-            description: "Invalid email or password.",
-          });
-        }
-      } else {
-        // Invalid role selection
+      const data = await response.json();
+
+      if (!response.ok) {
         toast({
           variant: "destructive",
-          title: "Invalid Role",
-          description: "Please select a valid role to login.",
+          title: "Login Failed",
+          description: data.error || "Invalid credentials.",
         });
+        return;
       }
 
-      if (isAuthenticated && loggedInRole) {
-        localStorage.setItem("userRole", loggedInRole);
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userRole", selectedRole);
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("isLoggedIn", "true");
 
-        toast({
-          title: "Login Successful",
-          description: `Welcome!`,
-        });
+      toast({
+        title: "Login Successful",
+        description: `Welcome!`,
+      });
 
-        router.push("/dashboard");
-      }
+      router.push("/dashboard");
     } catch (error) {
       console.error('Login error:', error);
       toast({
         variant: "destructive",
-        title: "Invalid Role",
+        title: "Login Error",
         description: "An error occurred during login. Please try again.",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
 
 
   return (

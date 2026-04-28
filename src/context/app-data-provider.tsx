@@ -146,58 +146,59 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     const [deadlines, setDeadlines] = useLocalStorage<StudentDeadlines>('studentDeadlines', {});
     const [activityLog, setActivityLog] = useLocalStorage<ActivityLogItem[]>('activityLog', [{ type: 'SYSTEM_START', payload: { name: 'System' }, timestamp: new Date().toISOString() }]);
 
-    // On initial load, load data from Supabase
+    // On initial load, load data from MongoDB
     useEffect(() => {
-        const loadDataFromSupabase = async () => {
+        const loadDataFromMongoDB = async () => {
             try {
-                // Load students from Supabase
+                // Load students from DB
                 try {
-                    const supabaseStudents = await StudentService.getAll();
-                    if (supabaseStudents.length > 0) {
-                        setStudents(supabaseStudents);
+                    const dbStudents = await StudentService.getAll();
+                    if (dbStudents.length > 0) {
+                        setStudents(dbStudents);
                     }
                 } catch (error) {
-                    console.warn("Failed to load students from Supabase, using cached data:", error);
+                    console.warn("Failed to load students from MongoDB, using cached data:", error);
                 }
 
-                // Load staff from Supabase
+                // Load staff from DB
                 try {
-                    const supabaseStaff = await StaffService.getAll();
-                    if (supabaseStaff.length > 0) {
-                        setStaff(supabaseStaff);
+                    const dbStaff = await StaffService.getAll();
+                    if (dbStaff.length > 0) {
+                        setStaff(dbStaff);
                     }
                 } catch (error) {
-                    console.warn("Failed to load staff from Supabase, using cached data:", error);
+                    console.warn("Failed to load staff from MongoDB, using cached data:", error);
                 }
 
-                // Load courses from Supabase
+                // Load courses from DB
                 try {
-                    const supabaseCourses = await CourseService.getAll();
-                    if (supabaseCourses.length > 0) {
-                        setCourses(supabaseCourses);
+                    const dbCourses = await CourseService.getAll();
+                    if (dbCourses.length > 0) {
+                        setCourses(dbCourses);
                     }
                 } catch (error) {
-                    console.warn("Failed to load courses from Supabase, using cached data:", error);
+                    console.warn("Failed to load courses from MongoDB, using cached data:", error);
                 }
 
-                // Load holidays from Supabase
+                // Load holidays from DB
                 try {
-                    const supabaseHolidays = await HolidayService.getAll();
-                    if (supabaseHolidays.length > 0) {
-                        setHolidays(supabaseHolidays);
+                    const dbHolidays = await HolidayService.getAll();
+                    if (dbHolidays.length > 0) {
+                        setHolidays(dbHolidays);
                     }
                 } catch (error) {
-                    console.warn("Failed to load holidays from Supabase, using cached data:", error);
+                    console.warn("Failed to load holidays from MongoDB, using cached data:", error);
                 }
             } catch (error) {
-                console.error("Unexpected error in loadDataFromSupabase:", error);
+                console.error("Unexpected error in loadDataFromMongoDB:", error);
             } finally {
                 setIsLoading(false);
             }
         };
 
-        loadDataFromSupabase();
+        loadDataFromMongoDB();
     }, [setStudents, setStaff, setCourses, setHolidays]);
+
 
     // Derived state and mutators
     const addStudent = (student: Student) => {
